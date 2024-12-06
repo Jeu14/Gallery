@@ -66,11 +66,40 @@ export class ImageService {
           path: true,
           createdAt: true,
           updatedAt: false,
+          user_id: true
         },
       });
       return images;
     } catch (error) {
       throw new BadRequestException('Failed to list images.');
+    }
+  }
+
+  async indexImage(user_id: string, image_id: string) {
+    try {
+      const image = await this.prisma.image.findFirst({
+        where: {
+          id: image_id,
+          user_id,
+        },
+        select: {
+          id: true,
+          url: true,
+          path: true,
+          createdAt: true,
+          user_id: true,
+          updatedAt: false,
+        },
+      });
+
+      if (!image) {
+        throw new BadRequestException('Image not found or does not belong to the user.');
+      }
+
+      return image
+
+    } catch (error) {
+      throw new BadRequestException('Failed to detail images.');
     }
   }
 }

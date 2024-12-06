@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -23,5 +23,12 @@ export class ImageController {
     const userId = req.user.userId
     return this.imageService.listImages(userId)
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('index/:image_id')
+  @HttpCode(200)
+  async indexImage(@Request() req, @Param('image_id') image_id: string) {
+    const userId = req.user.userId
+    return this.imageService.indexImage(userId, image_id)
+  }
 }
- 
