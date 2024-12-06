@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class ImageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async uploadFile(file: Express.Multer.File, user_id: string) {
+  async uploadImage(file: Express.Multer.File, user_id: string) {
     if (!file) {
       throw new BadRequestException('No file uploaded.');
     }
@@ -52,6 +52,25 @@ export class ImageService {
       return savedImage;
     } catch (error) {
       throw new BadRequestException('Failed to save image data.');
+    }
+  }
+
+  async listImages(user_id: string) {
+    try {
+      const images = await this.prisma.image.findMany({
+        where: { user_id },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          url: true,
+          path: true,
+          createdAt: true,
+          updatedAt: false,
+        },
+      });
+      return images;
+    } catch (error) {
+      throw new BadRequestException('Failed to list images.');
     }
   }
 }
