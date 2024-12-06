@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { loginUserSchema } from './dtos/Login-Dto';
 
@@ -7,6 +7,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('sign-in')
+  @HttpCode(200)
   async login(@Body() loginDto: any) {
     const { error } = loginUserSchema.validate(loginDto);
     if (error) {
