@@ -1,5 +1,5 @@
 services:
-  postgres:
+  database:
     container_name: gallery_api
     image: postgres:16-alpine
     environment:
@@ -10,3 +10,28 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  backend:
+    container_name: gallery_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      KEY_ID: ${KEY_ID}
+      APP_KEY: ${APP_KEY}
+      BUCKET_NAME: ${BUCKET_NAME}
+      ENDPOINT_BACKBLAZE: ${ENDPOINT_BACKBLAZE}
+      REGION: ${REGION}
+    depends_on:
+      - database
+    command: >
+      sh -c "
+        until pg_isready -h database -p 5432; do
+          echo 'Waiting for the database to be ready...';
+          sleep 2;
+        done;
+        npx prisma migrate dev
+        node dist/main.js"
+    ports:
+      - 3000:3000
