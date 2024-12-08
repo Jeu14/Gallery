@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import * as Joi from 'joi';
 
 export const createUserSchema = Joi.object({
@@ -14,3 +15,23 @@ export const createUserSchema = Joi.object({
     'string.min': 'Password must be at least 6 characters long',
   }),
 });
+
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'Name of the user to be created',
+    example: 'John Doe',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'Email of the user to be created',
+    example: 'johndoe@email.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'Password of the user to be created',
+    example: 'password123',
+  })
+  password: string;
+}

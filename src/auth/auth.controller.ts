@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { loginUserSchema } from './dtos/Login-Dto';
+import { LoginDto, loginUserSchema } from './dtos/Login-Dto';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -8,7 +9,8 @@ export class AuthController {
 
   @Post('sign-in')
   @HttpCode(200)
-  async login(@Body() loginDto: any) {
+  @ApiOperation({ summary: 'Sign-in the registered user' })
+  async login(@Body() loginDto: LoginDto) {
     const { error } = loginUserSchema.validate(loginDto);
     if (error) {
       throw new BadRequestException(error.details.map((err) => err.message));

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import * as Joi from 'joi';
 
 export const loginUserSchema = Joi.object({
@@ -10,3 +11,17 @@ export const loginUserSchema = Joi.object({
     'string.min': 'Password must be at least 6 characters long',
   }),
 });
+
+export class LoginDto {
+  @ApiProperty({
+    description: 'Email of the user trying to login',
+    example: 'johndoe@email.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'Password of the user trying to login',
+    example: 'password123',
+  })
+  password: string;
+}
