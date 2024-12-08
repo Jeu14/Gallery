@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,5 +30,21 @@ export class ImageController {
   async indexImage(@Request() req, @Param('image_id') image_id: string) {
     const userId = req.user.userId
     return this.imageService.indexImage(userId, image_id)
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('delete/single/:image_id')
+  @HttpCode(200)
+  async deleteImage(@Request() req, @Param('image_id') image_id: string) {
+    const userId = req.user.userId;
+    return this.imageService.deleteImage(userId, image_id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('delete/multiple')
+  @HttpCode(200)
+  async deleteMultipleImages(@Request() req, @Body('image_Ids') image_Ids: string[]) {
+    const userId = req.user.userId;
+    return this.imageService.deleteMultipleImages(userId, image_Ids);
   }
 }

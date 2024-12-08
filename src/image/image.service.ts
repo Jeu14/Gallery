@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { env } from 'process';
 import { s3 } from 'src/providers/b2.service';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -101,5 +101,66 @@ export class ImageService {
     } catch (error) {
       throw new BadRequestException('Failed to detail images.');
     }
+  }
+
+  async deleteImage(user_id: string, image_id: string) {
+    const image = await this.prisma.image.findFirst({
+        where: {
+          id: image_id,
+          user_id: user_id,
+        },
+      });
+    
+      if (!image || !image.id) {
+        throw new BadRequestException('Image not found or does not belong to the user.');
+      }
+    
+      const deleteParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: `images/${image.path}`,
+      };
+    
+      try {
+        await s3.send(new DeleteObjectCommand(deleteParams));
+    
+        await this.prisma.image.delete({
+          where: { id: image.id },
+        });
+    
+        return { message: 'Image successfully deleted' };
+      } catch (error) {
+        throw new BadRequestException('Failed to delete image from S3 or database.');
+      }
+  }
+
+  async deleteMultipleImages(user_id: string, image_ids: string[]) {
+    const images = await this.prisma.image.findMany({
+        where: {
+          id: { in: image_ids },
+          user_id: user_id,
+        },
+      });
+    
+      if (images.length !== image_ids.length) {
+        throw new BadRequestException('One or more images not found or do not belong to the user.');
+      }
+    
+      try {
+        for (const image of images) {
+          const deleteParams = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: `images/${image.path}`,
+          };
+          await s3.send(new DeleteObjectCommand(deleteParams));
+    
+          await this.prisma.image.delete({
+            where: { id: image.id },
+          });
+        }
+    
+        return { message: 'Images successfully deleted' };
+      } catch (error) {
+        throw new BadRequestException('Failed to delete images from S3 or database.');
+      }
   }
 }
