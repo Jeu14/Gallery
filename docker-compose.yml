@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   database:
     container_name: gallery_api
@@ -10,13 +12,14 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
+
   backend:
     container_name: gallery_backend
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://postgres:123456@database:5432/gallery_db
       SECRET_KEY: ${SECRET_KEY}
       KEY_ID: ${KEY_ID}
       APP_KEY: ${APP_KEY}
@@ -31,7 +34,7 @@ services:
           echo 'Waiting for the database to be ready...';
           sleep 2;
         done;
-        npx prisma migrate dev
+        npx prisma migrate deploy;
         node dist/main.js"
     ports:
       - 3000:3000

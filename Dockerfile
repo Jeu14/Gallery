@@ -1,6 +1,9 @@
-FROM node:20-alpine
+FROM node:20-bullseye
 
-RUN apk add --no-cache postgresql-client openssl
+RUN apt-get update && apt-get install -y \
+  libssl1.1 \
+  postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/api
 
@@ -12,4 +15,4 @@ COPY src ./src/
 RUN npm install
 RUN npm run build
 
-CMD ["npm", "start:prod"]
+CMD ["npm", "run", "start:prod"]
